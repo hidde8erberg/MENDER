@@ -472,6 +472,8 @@ class MENDER(object):
             # rst_dict[cur_batch_name] = cur_adata_MENDER
             adata_MENDER_list.append(cur_adata_MENDER)
         self.adata_MENDER_list = adata_MENDER_list
+        self.adata_MENDER = adata_MENDER_list[0].concatenate(adata_MENDER_list[1:]) if len(adata_MENDER_list) > 1 else adata_MENDER_list[0].copy()
+        self.adata_MENDER_dump = self.adata_MENDER.copy()
         
         
     def mp_helper(self,i):
