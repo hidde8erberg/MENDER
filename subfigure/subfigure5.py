@@ -121,9 +121,21 @@ if __name__ == '__main__':
             msm.adata_MENDER.write_h5ad('Allen2022_MERFISH_aging_MENDER_sub.h5ad')
             print(f'Subset of MENDER results written to file! \n')
 
-    #---------------------------------------------------------- plotting done from here -------------------------------------------------------------------------
-    print(f'Adding stage to mender results  \n')
-    adata_mender.obs['stage'] = adata_raw.obs['stage'].values 
+    #---------------------------------------------------------- plotting done from here -------------------------------------------------------------------
+
+    # Strip the last '-0' suffix from mender index to match raw data index
+    adata_mender.obs['raw_index'] = adata_mender.obs.index.str.rsplit('-', n=1).str[0]
+
+    # Verify the stripped index matches raw
+    assert adata_mender.obs['raw_index'].isin(adata_raw.obs.index).all(), \
+        "Stripped indices don't match raw index!"
+    print(f'All raw indexes in mender match the observed data indexes')
+
+    # Map age using the stripped index
+    adata_mender.obs['stage'] = adata_mender.obs['raw_index'].map(adata_raw.obs['stage'])
+    print(f'Adding stage to mender results based on raw index')
+
+    ###------------------------------------------------------------------------------
     
     # Color palette matching stages in paper
     stage_order = ['90wk', '24wk', '4wk']
@@ -132,7 +144,7 @@ if __name__ == '__main__':
         '24wk': '#F2B949',
         '4wk':  '#568203',
     }
-    gt_order = ['brain ventricle', 'corpus callosum', 'cortical layer II/III', 'cortical layer V', 'cortical layer VI', 'olfactory region', 'pia mater', 'striatum'] 
+    gt_order = ['brain ventricle', 'corpus callosum', 'cortical layer II/III', 'cortical layer V', 'cortical layer VI', 'olfactory region', 'pia mater', 'striatum']
 
     fig, axes = plt.subplots(2, 1, figsize=(10, 7))
 
@@ -146,8 +158,13 @@ if __name__ == '__main__':
             adata_mender.obs[domain_col],
             adata_mender.obs['stage']
         )
+
+        print(f'cross tabulation columns: {ct} \n')
+
         # Normalize to frequencies per domain 
         ct_norm = ct.div(ct.sum(axis=1), axis=0)
+        print(f'normalized: {ct_norm} \n')
+
         # Reorder columns to match stage order
         ct_norm = ct_norm[[s for s in stage_order if s in ct_norm.columns]]
         
