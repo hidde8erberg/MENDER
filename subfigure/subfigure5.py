@@ -146,6 +146,13 @@ if __name__ == '__main__':
     }
     gt_order = ['brain ventricle', 'corpus callosum', 'cortical layer II/III', 'cortical layer V', 'cortical layer VI', 'olfactory region', 'pia mater', 'striatum']
 
+    ##!---------------- DEBUGGING
+    print(f' Mender value counts: {adata_mender.obs["MENDER"].value_counts()}')
+    print(f' Mender total count: {adata_mender.obs["MENDER"].value_counts().sum()}')
+    print(f' ground truth value counts: {adata_mender.obs["gt"].value_counts()}')
+    print(f' ground total count: {adata_mender.obs["gt"].value_counts().sum()}')
+    ##!------------------
+
     fig, axes = plt.subplots(2, 1, figsize=(10, 7))
 
     for ax, domain_col, title in zip(
@@ -159,11 +166,11 @@ if __name__ == '__main__':
             adata_mender.obs['stage']
         )
 
-        print(f'cross tabulation columns: {ct} \n')
+        #!DEBUG:  print(f'cross tabulation columns: {ct} \n')
 
         # Normalize to frequencies per domain 
         ct_norm = ct.div(ct.sum(axis=1), axis=0)
-        print(f'normalized: {ct_norm} \n')
+        #!DEBUG:  print(f'normalized: {ct_norm} \n')
 
         # Reorder columns to match stage order
         ct_norm = ct_norm[[s for s in stage_order if s in ct_norm.columns]]
@@ -198,5 +205,5 @@ if __name__ == '__main__':
         ax.spines['right'].set_visible(False)
 
     plt.tight_layout()
-    plt.savefig('Figure5H.png', dpi=200, bbox_inches='tight')
+    # plt.savefig('Figure5H.png', dpi=200, bbox_inches='tight')
     plt.show()
